@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  resume-app:
+    build: .
+    container_name: resume_app
+    ports:
+      - "9999:8000"
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
+    restart: always

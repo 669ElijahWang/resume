@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>简历筛选平台</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="bg-blur bg-blur-1"></div>
+    <div class="bg-blur bg-blur-2"></div>
+    <header class="hero">
+      <div class="hero-text">
+        <p class="eyebrow">批量简历评分</p>
+        <h1>简历筛选控制台</h1>
+        <p class="subtitle">
+          一次性上传最多 100 份 PDF 简历，填写 JD，获得按总分排序的结果，
+          并查看各模块分数与评价。
+        </p>
+      </div>
+      <div class="hero-card">
+        <div class="card-header">
+          <h2>JD 与上传</h2>
+          <span class="pill">仅 PDF</span>
+        </div>
+        <label class="field">
+          <span>岗位 JD</span>
+          <textarea id="jdInput" rows="8" placeholder="在这里粘贴 JD..."></textarea>
+        </label>
+        <div id="dropzone" class="dropzone">
+          <input id="fileInput" type="file" accept=".pdf" multiple />
+          <div class="dropzone-text">
+            <strong>拖拽 PDF 到这里</strong>
+            <span>或点击选择文件</span>
+          </div>
+        </div>
+        <div id="fileList" class="file-list"></div>
+        <button id="uploadBtn" class="primary">上传并评分</button>
+        <p id="uploadNote" class="note"></p>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="status">
+        <div class="status-card">
+          <h3>处理状态</h3>
+          <div class="status-grid">
+            <div>
+              <span class="label">排队中</span>
+              <span id="queuedCount" class="value">0</span>
+            </div>
+            <div>
+              <span class="label">处理中</span>
+              <span id="processingCount" class="value">0</span>
+            </div>
+            <div>
+              <span class="label">已完成</span>
+              <span id="doneCount" class="value">0</span>
+            </div>
+            <div>
+              <span class="label">错误</span>
+              <span id="errorCount" class="value">0</span>
+            </div>
+          </div>
+          <div class="status-actions">
+            <button id="refreshBtn" class="ghost">刷新</button>
+            <button id="exportExcelBtn" class="ghost">导出 Excel</button>
+            <button id="exportMdBtn" class="ghost">导出 Markdown</button>
+          </div>
+        </div>
+        <div class="status-card light">
+          <h3>任务信息</h3>
+          <p class="meta">
+            当前任务 ID：
+            <span id="jobIdValue">-</span>
+          </p>
+          <p class="meta">
+            简历总数：
+            <span id="totalCount">0</span>
+          </p>
+          <p class="meta">
+            轮询状态：
+            <span id="pollingState">空闲</span>
+          </p>
+        </div>
+      </section>
+
+      <section class="results">
+        <div class="results-header">
+          <h3>评分结果</h3>
+          <span id="resultsCount" class="pill">0 条</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead id="resultsHead"></thead>
+            <tbody id="resultsBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
