@@ -1,5 +1,6 @@
 import json
 import re
+import time
 from typing import Any, Dict, List
 
 import httpx
@@ -9,9 +10,20 @@ from .settings import (
     MAX_TEXT_CHARS,
     QWEN_API_KEY,
     QWEN_BASE_URL,
+    QWEN_MAX_RETRIES,
     QWEN_MODEL,
+    QWEN_RETRY_BACKOFF,
     QWEN_TIMEOUT,
 )
+
+
+def _should_retry(exc: Exception) -> bool:
+    if isinstance(exc, httpx.HTTPStatusError):
+        status = exc.response.status_code
+        return status in {429, 500, 502, 503, 504}
+    if isinstance(exc, httpx.RequestError):
+        return True
+    return False
 
 
 def _truncate_text(text: str, max_chars: int) -> str:
@@ -39,17 +51,21 @@ def _extract_json(text: str) -> str:
     return text[start : end + 1]
 
 
-def _default_modules() -> List[Dict[str, Any]]:
-    return [{"name": m["name"], "score": 0, "comment": ""} for m in DEFAULT_MODULES]
+def _default_modules(module_defs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    return [{"name": m["name"], "score": 0, "comment": ""} for m in module_defs]
 
 
-def _normalize_result(data: Dict[str, Any]) -> Dict[str, Any]:
+def _normalize_result(
+    data: Dict[str, Any], module_defs: List[Dict[str, Any]]
+) -> Dict[str, Any]:
     modules_in = data.get("modules") if isinstance(data.get("modules"), list) else []
     normalized = {m["name"]: m for m in modules_in if isinstance(m, dict)}
 
     modules_out = []
-    for module in DEFAULT_MODULES:
-        name = module["name"]
+    for module in module_defs:
+        name = module.get("name", "")
+        if not name:
+            continue
         item = normalized.get(name, {})
         score = item.get("score")
         try:
@@ -84,12 +100,19 @@ def _normalize_result(data: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def score_resume(jd_text: str, resume_text: str) -> Dict[str, Any]:
+def score_resume(
+    jd_text: str, resume_text: str, modules: List[Dict[str, Any]]
+) -> Dict[str, Any]:
     if not QWEN_API_KEY:
         raise RuntimeError("QWEN_API_KEY is not set.")
 
+    module_defs = modules or DEFAULT_MODULES
     modules_desc = "\n".join(
-        [f"- {m['name']}: {m['desc']}" for m in DEFAULT_MODULES]
+        [
+            f"- {m['name']}: {m.get('desc', '')}".strip()
+            for m in module_defs
+            if m.get("name")
+        ]
     )
 
     system_prompt = (
@@ -130,11 +153,25 @@ def score_resume(jd_text: str, resume_text: str) -> Dict[str, Any]:
 
     headers = {"Authorization": f"Bearer {QWEN_API_KEY}"}
     with httpx.Client(timeout=QWEN_TIMEOUT) as client:
-        resp = client.post(QWEN_BASE_URL, json=payload, headers=headers)
-        resp.raise_for_status()
-        data = resp.json()
-        content = data["choices"][0]["message"]["content"]
+        attempts = max(0, QWEN_MAX_RETRIES) + 1
+        last_exc: Exception | None = None
+        for attempt in range(attempts):
+            try:
+                resp = client.post(QWEN_BASE_URL, json=payload, headers=headers)
+                resp.raise_for_status()
+                data = resp.json()
+                content = data["choices"][0]["message"]["content"]
+                last_exc = None
+                break
+            except Exception as exc:
+                last_exc = exc
+                if attempt >= attempts - 1 or not _should_retry(exc):
+                    raise
+                backoff = max(0.0, QWEN_RETRY_BACKOFF) * (2**attempt)
+                time.sleep(backoff)
+        if last_exc is not None:
+            raise last_exc
 
     raw_json = _extract_json(content)
     parsed = json.loads(raw_json)
-    return _normalize_result(parsed)
+    return _normalize_result(parsed, module_defs)

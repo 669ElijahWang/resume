@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>评分标准管理</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="admin.js" defer></script>
+  </head>
+  <body>
+    <div class="bg-blur bg-blur-1"></div>
+    <div class="bg-blur bg-blur-2"></div>
+
+    <main class="content admin-content">
+      <section class="admin-card">
+        <div class="admin-head">
+          <div>
+            <p class="eyebrow">评分标准</p>
+            <h1 class="admin-title">评分标准管理</h1>
+            <p class="subtitle">
+              管理不同岗位的评分模块、权重与说明，保存后立即生效。
+            </p>
+          </div>
+          <div class="admin-actions">
+            <a class="ghost button-link" href="/">返回筛选</a>
+            <button id="newProfileBtn" class="primary">新增标准</button>
+          </div>
+        </div>
+
+        <div class="admin-grid">
+          <aside class="profile-list">
+            <div class="list-head">
+              <h3>标准列表</h3>
+              <span id="profileCount" class="pill">0</span>
+            </div>
+            <div id="profileList" class="list-body"></div>
+          </aside>
+
+          <div class="profile-editor">
+            <div class="editor-head">
+              <h3>编辑标准</h3>
+              <p id="editorHint" class="note"></p>
+            </div>
+
+            <div class="editor-fields">
+              <label class="field">
+                <span>标准名称</span>
+                <input id="profileName" type="text" placeholder="例如：Java后端-重学历" />
+              </label>
+              <label class="field">
+                <span>版本号</span>
+                <input id="profileVersion" type="number" min="1" step="1" />
+              </label>
+            </div>
+
+            <div class="modules-section">
+              <div class="module-header">
+                <span>模块名</span>
+                <span>显示名</span>
+                <span>说明</span>
+                <span>权重</span>
+                <span>必备</span>
+                <span>门槛</span>
+                <span></span>
+              </div>
+              <div id="modulesContainer"></div>
+              <button id="addModuleBtn" class="ghost small">新增模块</button>
+              <p id="weightTip" class="note"></p>
+            </div>
+
+            <div class="form-actions">
+              <button id="saveProfileBtn" class="primary">保存</button>
+              <button id="deleteProfileBtn" class="ghost danger">删除</button>
+            </div>
+            <p id="adminNote" class="note"></p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

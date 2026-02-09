@@ -17,6 +17,8 @@ QWEN_BASE_URL = os.getenv(
 )
 QWEN_MODEL = os.getenv("QWEN_MODEL", "qwen3-max")
 QWEN_TIMEOUT = float(os.getenv("QWEN_TIMEOUT", "60"))
+QWEN_MAX_RETRIES = int(os.getenv("QWEN_MAX_RETRIES", "2"))
+QWEN_RETRY_BACKOFF = float(os.getenv("QWEN_RETRY_BACKOFF", "0.8"))
 
 MAX_FILES = int(os.getenv("MAX_FILES", "100"))
 MAX_TEXT_CHARS = int(os.getenv("MAX_TEXT_CHARS", "12000"))

@@ -166,6 +166,26 @@ h1 {
   align-items: center;
 }
 
+.card-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.link {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: var(--radius-full);
+  background: var(--primary-light);
+}
+
+.link:hover {
+  color: var(--primary-hover);
+}
+
 .card-header h2 {
   font-size: 1.25rem;
   font-weight: 600;
@@ -207,6 +227,25 @@ textarea {
   resize: vertical;
   transition: var(--transition);
   box-shadow: var(--shadow-sm);
+}
+
+select {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: white;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  color: var(--text-main);
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
 textarea:focus {
@@ -487,6 +526,176 @@ td:nth-child(4) {
   font-family: var(--font-mono);
 }
 
+/* Admin Page */
+.admin-content {
+  padding-top: 32px;
+}
+
+.admin-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: var(--shadow-glass);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.admin-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.admin-title {
+  font-size: 2.4rem;
+  margin: 0 0 8px 0;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.button-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+}
+
+.profile-list,
+.profile-editor {
+  background: white;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  padding: 20px;
+}
+
+.list-head,
+.editor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.list-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+.profile-item {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-body);
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.profile-item.active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary-hover);
+}
+
+.editor-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.editor-fields input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  font-size: 0.95rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.modules-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.module-header,
+.module-row {
+  display: grid;
+  grid-template-columns: 1.1fr 1.1fr 1.6fr 0.6fr 0.7fr 0.6fr 0.5fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.module-header span {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.module-row input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+
+.module-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.module-check input {
+  width: auto;
+  margin: 0;
+}
+
+.ghost.small {
+  padding: 8px 14px;
+  font-size: 0.8rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.ghost.danger {
+  border-color: #fecaca;
+  color: #b42318;
+}
+
+.ghost.danger:hover {
+  background: #fff1f2;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .hero {
@@ -510,6 +719,10 @@ td:nth-child(4) {
   h1 {
     font-size: 2.5rem;
   }
+
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 640px) {
@@ -528,5 +741,20 @@ td:nth-child(4) {
 
   .status-actions button {
     width: 100%;
+  }
+
+  .admin-card {
+    padding: 20px;
+  }
+
+  .module-header,
+  .module-row {
+    grid-template-columns: 1fr;
+  }
+
+  .module-row {
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
   }
 }

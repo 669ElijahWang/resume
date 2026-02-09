@@ -1,4 +1,5 @@
 const jdInput = document.getElementById("jdInput");
+const profileSelect = document.getElementById("profileSelect");
 const fileInput = document.getElementById("fileInput");
 const fileList = document.getElementById("fileList");
 const uploadBtn = document.getElementById("uploadBtn");
@@ -23,6 +24,7 @@ const exportMdBtn = document.getElementById("exportMdBtn");
 let selectedFiles = [];
 let currentJobId = null;
 let pollTimer = null;
+let profiles = [];
 const MAX_FILES = 100;
 const MODULE_LABELS = {
   SkillMatch: "技能匹配",
@@ -33,6 +35,7 @@ const MODULE_LABELS = {
   Stability: "稳定性",
 };
 const BASE_HEADERS = ["姓名", "联系方式", "邮箱", "总分", "总评"];
+const PROFILE_CACHE_KEY = "resume_profile_id";
 
 function setNote(text, isError = false) {
   uploadNote.textContent = text;
@@ -62,6 +65,79 @@ function handleFiles(files) {
   renderFileList();
 }
 
+function moduleName(module) {
+  if (typeof module === "string") {
+    return module;
+  }
+  return module && module.name ? module.name : "";
+}
+
+function moduleLabel(module) {
+  if (typeof module === "string") {
+    return MODULE_LABELS[module] || module;
+  }
+  const name = moduleName(module);
+  const label = module && module.label ? module.label : "";
+  if (label && label !== name) {
+    return label;
+  }
+  return MODULE_LABELS[name] || label || name;
+}
+
+function renderProfileOptions() {
+  if (!profileSelect) {
+    return;
+  }
+  profileSelect.innerHTML = "";
+  if (!profiles.length) {
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "暂无评分标准";
+    profileSelect.appendChild(option);
+    profileSelect.disabled = true;
+    uploadBtn.disabled = true;
+    setNote("请先在评分标准管理里创建评分标准。", true);
+    return;
+  }
+  profiles.forEach((profile) => {
+    const option = document.createElement("option");
+    option.value = profile.id;
+    option.textContent = profile.name || profile.id;
+    profileSelect.appendChild(option);
+  });
+  profileSelect.disabled = false;
+  uploadBtn.disabled = false;
+  const saved = localStorage.getItem(PROFILE_CACHE_KEY);
+  if (saved && profiles.some((profile) => profile.id === saved)) {
+    profileSelect.value = saved;
+  } else {
+    profileSelect.value = profiles[0].id;
+  }
+}
+
+async function loadProfiles() {
+  if (!profileSelect) {
+    return;
+  }
+  try {
+    const res = await fetch("/api/score-profiles");
+    if (!res.ok) {
+      throw new Error("无法加载评分标准");
+    }
+    const data = await res.json();
+    profiles = data.items || [];
+    renderProfileOptions();
+  } catch (err) {
+    setNote(err.message || "无法加载评分标准", true);
+  }
+}
+
+if (profileSelect) {
+  profileSelect.addEventListener("change", () => {
+    localStorage.setItem(PROFILE_CACHE_KEY, profileSelect.value);
+  });
+}
+
 fileInput.addEventListener("change", (event) => {
   handleFiles(event.target.files);
 });
@@ -87,6 +163,10 @@ async function upload() {
     setNote("请填写 JD。", true);
     return;
   }
+  if (profileSelect && !profileSelect.value) {
+    setNote("请选择评分标准。", true);
+    return;
+  }
   if (!selectedFiles.length) {
     setNote("请选择 PDF 文件。", true);
     return;
@@ -95,6 +175,9 @@ async function upload() {
   setNote("正在上传...");
   const formData = new FormData();
   formData.append("jd", jd);
+  if (profileSelect) {
+    formData.append("profile_id", profileSelect.value);
+  }
   selectedFiles.forEach((file) => formData.append("files", file));
 
   try {
@@ -163,7 +246,7 @@ async function fetchStatus() {
 function buildTableHeader(modules) {
   const headers = BASE_HEADERS.slice();
   modules.forEach((module) => {
-    const label = MODULE_LABELS[module] || module;
+    const label = moduleLabel(module);
     headers.push(`${label}分数`);
     headers.push(`${label}评价`);
   });
@@ -188,7 +271,8 @@ function buildTableBody(items, modules) {
     });
 
     modules.forEach((module) => {
-      const mod = moduleMap[module] || {};
+      const name = moduleName(module);
+      const mod = moduleMap[name] || {};
       const score = mod.score == null ? "" : Number(mod.score).toFixed(1);
       cells.push(score);
       cells.push(mod.comment || "");
@@ -231,3 +315,4 @@ function stopPolling(state) {
 }
 
 renderFileList();
+loadProfiles();
